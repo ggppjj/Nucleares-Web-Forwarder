@@ -23,7 +23,7 @@ jobs:
 
       - name: Build solution for ${{ matrix.platform }}
         run: |
-          msbuild YourSolution.sln /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:OutDir=build\${{ matrix.platform }}\
+          msbuild "Nucleares Web Forwarder.sln" /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:OutDir=build\${{ matrix.platform }}\
 
       - name: Upload build artifact for ${{ matrix.platform }}
         uses: actions/upload-artifact@v4
