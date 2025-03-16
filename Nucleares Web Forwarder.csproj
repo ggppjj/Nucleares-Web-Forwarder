@@ -4,6 +4,7 @@
         <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
         <!-- Keep the multi-RID list for publishing to all platforms -->
         <RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm;linux-arm64</RuntimeIdentifiers>
+        <Platforms>AnyCPU;x64;ARM64</Platforms>
     </PropertyGroup>
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
