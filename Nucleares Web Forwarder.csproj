@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
     <PropertyGroup>
-        <!-- Force win-arm64 when building on an ARM device -->
-        <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
-        <!-- Keep the multi-RID list for publishing to all platforms -->
-        <RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm;linux-arm64</RuntimeIdentifiers>
+        <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm;linux-arm64</RuntimeIdentifiers>
         <Platforms>AnyCPU;x64;ARM64</Platforms>
     </PropertyGroup>
     <PropertyGroup>
@@ -12,7 +9,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Nucleares_Web_Forwarder</RootNamespace>
         <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <DebugSymbols>false</DebugSymbols>
+        <DebugType>none</DebugType>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Makaretu.Dns.Multicast" Version="0.27.0" />
@@ -26,5 +27,13 @@
     </ItemGroup>
     <ItemGroup>
       <None Include=".github\workflows\package.yaml" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)'=='Release'">
+        <None Update="App.config">
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </None>
+        <None Update="Nucleares Web Forwarder.dll.config">
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 </Project>
