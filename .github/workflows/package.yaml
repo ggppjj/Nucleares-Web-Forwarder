@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -13,24 +14,24 @@ jobs:
     strategy:
       matrix:
         include:
+          # Windows builds
           - os: windows-latest
             platform: x86
-            runtimeIdentifier: win-x32
+            runtimeIdentifier: win-x86
           - os: windows-latest
             platform: x64
             runtimeIdentifier: win-x64
           - os: windows-latest
             platform: ARM64
             runtimeIdentifier: win-arm64
-          - os: ubuntu-latest
-            platform: x86
-            runtimeIdentifier: linux-x86
+          # Linux builds
           - os: ubuntu-latest
             platform: x64
             runtimeIdentifier: linux-x64
-          - os: ubuntu-latest
-            platform: ARM32
-            runtimeIdentifier: linux-arm
+          # TODO: Fix arm32 linux build.
+          #- os: ubuntu-latest
+          #  platform: ARM32
+          #  runtimeIdentifier: linux-arm
           - os: ubuntu-latest
             platform: ARM64
             runtimeIdentifier: linux-arm64
@@ -43,30 +44,65 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
+      # Install GCC and Clang dependencies for Linux builds.
+      - name: Install GCC dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc gcc-multilib g++ g++-multilib clang
+
+      # Install ARM32 toolchain for linux-arm
+      - name: Install ARM32 toolchain for linux-arm
+        if: matrix.runtimeIdentifier == 'linux-arm'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+
+      # Install ARM64 toolchain for linux-arm64
+      - name: Install ARM64 toolchain for linux-arm64
+        if: matrix.runtimeIdentifier == 'linux-arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+
       - name: Restore NuGet packages
         run: dotnet restore "Nucleares Web Forwarder.sln"
 
-      - name: Publish build for ${{ matrix.platform }}
+      - name: Publish build for Linux
+        if: runner.os == 'Linux'
         run: |
-          if [ "${{ matrix.runtimeIdentifier }}" = "linux-x86" ]; then
-              dotnet publish "Nucleares Web Forwarder.csproj" -c Release -r ${{ matrix.runtimeIdentifier }} --self-contained true \
+          if [ "${{ matrix.runtimeIdentifier }}" = "linux-arm64" ]; then
+            dotnet publish "Nucleares Web Forwarder.csproj" -c Release -r linux-arm64 --self-contained true \
               /p:PublishSingleFile=true \
-              /p:PublishTrimmed=true \
               /p:PublishReadyToRun=true \
+              /p:PublishAot=true \
+              /p:ObjCopyName=aarch64-linux-gnu-objcopy \
+              -o build/${{ matrix.platform }}
+          elif [ "${{ matrix.runtimeIdentifier }}" = "linux-arm" ]; then
+            dotnet publish "Nucleares Web Forwarder.csproj" -c Release -r linux-arm --self-contained true \
+              /p:PublishSingleFile=true \
+              /p:PublishReadyToRun=true \
+              /p:PublishAot=true \
+              /p:IlcTargetTriple=armv7-linux-gnueabihf \
               -o build/${{ matrix.platform }}
           else
-              dotnet publish "Nucleares Web Forwarder.csproj" -c Release -r ${{ matrix.runtimeIdentifier }} --self-contained true \
+            dotnet publish "Nucleares Web Forwarder.csproj" -c Release -r ${{ matrix.runtimeIdentifier }} --self-contained true \
               /p:PublishSingleFile=true \
-              /p:PublishTrimmed=true \
               /p:PublishReadyToRun=true \
               /p:PublishAot=true \
               -o build/${{ matrix.platform }}
           fi
 
+      - name: Publish build for Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: dotnet publish "Nucleares Web Forwarder.csproj" -c Release -r ${{ matrix.runtimeIdentifier }} --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:PublishAot=true -o build/${{ matrix.platform }}
+
       - name: Upload build artifact for ${{ matrix.platform }}
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.platform }}
+          # Append OS, platform, and runtimeIdentifier to ensure a unique artifact name
+          name: build-${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.runtimeIdentifier }}
           path: build/${{ matrix.platform }}/*
 
   release:
@@ -81,8 +117,7 @@ jobs:
           path: build_artifacts
 
       - name: Zip build artifacts
-        run: |
-          powershell -Command "Compress-Archive -Path 'build_artifacts\*' -DestinationPath release.zip"
+        run: powershell -Command "Compress-Archive -Path 'build_artifacts\*' -DestinationPath release.zip"
 
       - name: Create Release
         id: create_release
