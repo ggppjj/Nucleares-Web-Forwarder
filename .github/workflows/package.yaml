@@ -12,7 +12,11 @@ jobs:
     name: Build on ${{ matrix.platform }}
     strategy:
       matrix:
-        platform: [ x64, ARM64 ]
+        include:
+          - platform: x64
+            runtimeIdentifier: win-x64
+          - platform: ARM64
+            runtimeIdentifier: win-arm64
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -26,7 +30,7 @@ jobs:
 
       - name: Build solution for ${{ matrix.platform }}
         run: |
-          msbuild "Nucleares Web Forwarder.sln" /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:OutDir=build\${{ matrix.platform }}\
+          msbuild "Nucleares Web Forwarder.sln" /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:RuntimeIdentifier=${{ matrix.runtimeIdentifier }} /p:OutDir=build\${{ matrix.platform }}\
           
       - name: Upload build artifact for ${{ matrix.platform }}
         uses: actions/upload-artifact@v4
