@@ -12,25 +12,39 @@ jobs:
     name: Build on ${{ matrix.platform }}
     strategy:
       matrix:
-        platform: [ x64, win-arm64 ]
+        include:
+          - platform: x64
+            runtimeIdentifier: win-x64
+          - platform: ARM64
+            runtimeIdentifier: win-arm64
     runs-on: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup MSBuild environment
-        uses: microsoft/setup-msbuild@v1.1
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'  # Adjust as needed
 
-      - name: Build solution for ${{ matrix.platform }}
+      - name: Restore NuGet packages
+        run: dotnet restore "Nucleares Web Forwarder.sln"
+
+      - name: Publish single-file, self-contained, ready-to-run, and AOT for ${{ matrix.platform }}
         run: |
-          msbuild "Nucleares Web Forwarder.sln" /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:OutDir=build\${{ matrix.platform }}\
+          dotnet publish "Nucleares Web Forwarder.csproj" -c Release -r ${{ matrix.runtimeIdentifier }} --self-contained true `
+            /p:PublishSingleFile=true `
+            /p:PublishTrimmed=true `
+            /p:PublishReadyToRun=true `
+            /p:PublishAot=true `
+            -o build/${{ matrix.platform }}
 
       - name: Upload build artifact for ${{ matrix.platform }}
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.platform }}
           path: build/${{ matrix.platform }}/*
-          
+
   release:
     name: Create Release and Upload Assets
     if: startsWith(github.ref, 'refs/tags/')
@@ -65,5 +79,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: release.zip
-          asset_name: MyService.zip
+          asset_name: NuclearesWebForwarder.zip
           asset_content_type: application/zip
