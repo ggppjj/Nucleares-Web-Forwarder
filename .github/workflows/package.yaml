@@ -1,4 +1,4 @@
-name: Windows CI/CD
+name: CI/CD
 
 on:
   push:
@@ -9,15 +9,31 @@ on:
 
 jobs:
   build:
-    name: Build on ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-          - platform: x64
+          - os: windows-latest
+            platform: x86
+            runtimeIdentifier: win-x32
+          - os: windows-latest
+            platform: x64
             runtimeIdentifier: win-x64
-          - platform: ARM64
+          - os: windows-latest
+            platform: ARM64
             runtimeIdentifier: win-arm64
-    runs-on: windows-latest
+          - os: ubuntu-latest
+            platform: x86
+            runtimeIdentifier: linux-x86
+          - os: ubuntu-latest
+            platform: x64
+            runtimeIdentifier: linux-x64
+          - os: ubuntu-latest
+            platform: ARM32
+            runtimeIdentifier: linux-arm
+          - os: ubuntu-latest
+            platform: ARM64
+            runtimeIdentifier: linux-arm64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -25,18 +41,18 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '9.0.x'  # Adjust as needed
+          dotnet-version: '9.0.x'
 
       - name: Restore NuGet packages
         run: dotnet restore "Nucleares Web Forwarder.sln"
 
       - name: Publish single-file, self-contained, ready-to-run, and AOT for ${{ matrix.platform }}
         run: |
-          dotnet publish "Nucleares Web Forwarder.csproj" -c Release -r ${{ matrix.runtimeIdentifier }} --self-contained true `
-            /p:PublishSingleFile=true `
-            /p:PublishTrimmed=true `
-            /p:PublishReadyToRun=true `
-            /p:PublishAot=true `
+          dotnet publish "Nucleares Web Forwarder.csproj" -c Release -r ${{ matrix.runtimeIdentifier }} --self-contained true \
+            /p:PublishSingleFile=true \
+            /p:PublishTrimmed=true \
+            /p:PublishReadyToRun=true \
+            /p:PublishAot=true \
             -o build/${{ matrix.platform }}
 
       - name: Upload build artifact for ${{ matrix.platform }}
