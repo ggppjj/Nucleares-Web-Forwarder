@@ -21,6 +21,9 @@ jobs:
       - name: Setup MSBuild environment
         uses: microsoft/setup-msbuild@v1.1
 
+      - name: Restore NuGet packages
+        run: dotnet restore "Nucleares Web Forwarder.sln"
+
       - name: Build solution for ${{ matrix.platform }}
         run: |
           msbuild "Nucleares Web Forwarder.sln" /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:OutDir=build\${{ matrix.platform }}\
