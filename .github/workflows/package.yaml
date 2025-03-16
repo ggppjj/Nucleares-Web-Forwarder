@@ -12,7 +12,7 @@ jobs:
     name: Build on ${{ matrix.platform }}
     strategy:
       matrix:
-        platform: [ x64, win-arm64 ]
+        platform: [ x64, ARM64 ]
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -24,7 +24,7 @@ jobs:
       - name: Build solution for ${{ matrix.platform }}
         run: |
           msbuild "Nucleares Web Forwarder.sln" /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:OutDir=build\${{ matrix.platform }}\
-
+          
       - name: Upload build artifact for ${{ matrix.platform }}
         uses: actions/upload-artifact@v4
         with:
@@ -65,5 +65,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: release.zip
-          asset_name: MyService.zip
+          asset_name: NuclearesWebForwarder.zip
           asset_content_type: application/zip
