@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+    <PropertyGroup>
+        <!-- Force win-arm64 when building on an ARM device -->
+        <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
+        <!-- Keep the multi-RID list for publishing to all platforms -->
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm;linux-arm64</RuntimeIdentifiers>
+    </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>Nucleares_Web_Forwarder</RootNamespace>
+        <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Makaretu.Dns.Multicast" Version="0.27.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.3" />
+        <PackageReference Include="System.Net.Http" Version="4.3.4" />
+        <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+        <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+    </ItemGroup>
+</Project>
