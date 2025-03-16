@@ -2,14 +2,14 @@
     <PropertyGroup>
         <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm;linux-arm64</RuntimeIdentifiers>
         <Platforms>AnyCPU;x64;ARM64</Platforms>
-    </PropertyGroup>
-    <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Nucleares_Web_Forwarder</RootNamespace>
         <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <PublishAot>true</PublishAot>
+        <PublishSingleFile>true</PublishSingleFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
         <DebugSymbols>false</DebugSymbols>
@@ -27,13 +27,5 @@
     </ItemGroup>
     <ItemGroup>
       <None Include=".github\workflows\package.yaml" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(Configuration)'=='Release'">
-        <None Update="App.config">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-        </None>
-        <None Update="Nucleares Web Forwarder.dll.config">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-        </None>
     </ItemGroup>
 </Project>
